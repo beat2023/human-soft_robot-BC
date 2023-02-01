@@ -1,0 +1,3 @@
+# To copy and paste the following line in the terminal below
+
+python bco_final.py --mode=test_human --demo_name=loop --remap_type=ellipsoid

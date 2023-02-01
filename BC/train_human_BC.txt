@@ -1,0 +1,3 @@
+# To copy and paste the following line in the terminal below
+
+python bco_final.py --mode=train_human --demo_name=circle --remap_type=ellipsoid
