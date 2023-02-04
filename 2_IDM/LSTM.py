@@ -76,6 +76,22 @@ scaler_press = MinMaxScaler(feature_range=(-1, 1))
 scaler_press.fit(pressures)
 press_scaled = scaler_press.transform(pressures)
 
+########################################################################################################################
+# Transform pressure values in [0, 1] Bar values
+# min_press = np.reshape(min_press, (1, 6))
+# max_press = np.reshape(max_press, (1, 6))
+# scaler_bar = MinMaxScaler(feature_range=(0, 1))
+# norm_pars_press = np.append(min_press, max_press, axis=0)
+# scaler_bar.fit(norm_pars_press)
+#
+#
+# def bars_val(input_val):
+#     res = scaler_bar.transform(input_val)
+#     return res
+
+
+########################################################################################################################
+
 # Shifting positions and pressures to create features set
 X_tot = pos_scaled
 pos_prev = pos_scaled[:-1, :]

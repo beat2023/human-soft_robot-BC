@@ -12,7 +12,7 @@ from matplotlib import pyplot as plt
 # demo_type = 'human' or 'robot'
 demo_type = 'human'
 # demo_name = 'elongation' or 'circle' or 'loop'
-demo_name = 'loop'
+demo_name = 'cross'
 # remap_type = 'minMax', 'norm', 'zScore', 'confInt' or 'ellipsoid'
 remap_type = 'ellipsoid'
 
@@ -173,3 +173,73 @@ else:
                      f"\nMAE with idm-passed demo (distal segment): {round(float(MAE_idm_new_avg), 3)}\u00B1"
                      f"{round(float(MAE_idm_new_std), 3)}")
     plt.show()
+
+
+########################################################################################################################
+# Distribution of policy testing
+policy_no_out = np.array(resampled_policy_all)
+policy_no_out = policy_no_out[~idx_outlier, :, :]
+
+max_dist_all = np.zeros((6,))
+max_idx_all = np.zeros((6,))
+max_dist_paths = np.zeros((2, 6))
+for i in range(len(policy_no_out)):
+    for j in range(len(policy_no_out)):
+        distance = abs(policy_no_out[i, :, :] - policy_no_out[j, :, :])
+        max_dist = np.max(distance, axis=0)
+        max_idx = np.argmax(distance, axis=0)
+        for k in range(len(max_dist)):
+            if max_dist[k] > max_dist_all[k]:
+                max_dist_all[k] = max_dist[k]
+                max_idx_all[k] = max_idx[k]
+                max_dist_paths[0, k] = i
+                max_dist_paths[1, k] = j
+
+max_idx_all = max_idx_all.astype(int)
+max_dist_paths = max_dist_paths.astype(int)
+
+mrk_avg = np.zeros(policy_no_out[0].shape)
+mrk_std = np.zeros(policy_no_out[0].shape)
+for j in range(policy_no_out.shape[1]):
+    mrk_avg[j, :] = np.mean(policy_no_out[:, j, :], axis=0)
+for j in range(policy_no_out.shape[1]):
+    mrk_std[j, :] = np.std(policy_no_out[:, j, :], axis=0)
+
+fig, axs = plt.subplots(6, 2)
+fig.suptitle(f'Testing {demo_name} policy')
+axs[0, 0].title.set_text('All episodes')
+axs[0, 1].title.set_text('Average \u00B1 2*standard deviation')
+for s in range(policy_no_out.shape[0]):
+    for m in range(policy_no_out.shape[2]):
+        axs[m, 0].plot(policy_no_out[s, :, m], '--', linewidth=0.3)
+        axs[m, 0].plot([max_idx_all[m], max_idx_all[m]], [policy_no_out[max_dist_paths[0, m], max_idx_all[m], m],
+                            policy_no_out[max_dist_paths[1, m], max_idx_all[m], m]], color='red', linewidth=0.8,
+                            label=f'{round(max_dist_all[m], 1)}mm')
+        if s == 0:
+            axs[m, 0].legend(loc='upper left')
+axs[0, 0].set(ylabel='x proximal')
+axs[1, 0].set(ylabel='y proximal')
+axs[2, 0].set(ylabel='z proximal')
+axs[3, 0].set(ylabel='x distal')
+axs[4, 0].set(ylabel='y distal')
+axs[5, 0].set(ylabel='z distal')
+for m in range(policy_no_out.shape[2]):
+    axs[m, 1].plot(mrk_avg[:, m], '-', color='k', linewidth=1.5, label='avg')
+    axs[m, 1].plot(mrk_avg[:, m] + 2*mrk_std[:, m], '--', color='k', linewidth=0.8, label='2*std')
+    axs[m, 1].plot(mrk_avg[:, m] - 2*mrk_std[:, m], '--', color='k', linewidth=0.8)
+for ax in axs.flat:
+    ax.set(xlabel='Sample number')
+# Hide x labels and tick labels for top plots and y ticks for right plots.
+for ax in axs.flat:
+    ax.label_outer()
+plt.legend()
+plt.show()
+
+all_vals = []
+for m in range(6):
+    val = 2*np.mean(mrk_std[:, m])
+    all_vals.append(val)
+    print(f'2*std dimension {m}: {round(val, 1)}')
+all_vals = np.array(all_vals)
+all_vals_avg = np.mean(all_vals)
+print(f'Average value: {round(all_vals_avg, 1)}')

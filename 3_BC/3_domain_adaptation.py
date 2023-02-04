@@ -29,7 +29,6 @@ zdata_robot = all_data_robot[:, [2, 5]]
 ydata_robot = all_data_robot[:, [1, 4]]
 xdata_robot = all_data_robot[:, [0, 3]]
 
-
 # PLOT OF ROBOT BABBLING DATA
 # fig_rob = plt.figure()
 # ax = plt.axes(projection='3d')
@@ -51,6 +50,54 @@ all_data_original = all_data_robot.copy()
 max_robot = np.amax(all_data_robot, axis=0)
 min_robot = np.amin(all_data_robot, axis=0)
 
+
+def plot_robot_human(data2plot, remap_type):
+    fig, ax = plt.subplots(1, 2)
+    ax[0].set_xlabel('X [mm]')
+    ax[0].set_ylabel('Y [mm]')
+    ax[1].set_xlabel('X [mm]')
+    ax[0].set_title('Proximal')
+    ax[1].set_title('Distal')
+    fig.suptitle(f'{remap_type} remapping: X-Y plane')
+    ax[0].scatter(xdata_robot[:, 0], ydata_robot[:, 0], c='b', s=3, label='robot')
+    ax[0].scatter(data2plot[:, 0], data2plot[:, 1], c='r', s=3, label='human')
+    ax[1].scatter(xdata_robot[:, 1], ydata_robot[:, 1], c='b', s=3, label='robot')
+    ax[1].scatter(data2plot[:, 3], data2plot[:, 4], c='r', s=3, label='human')
+    ax[1].legend()
+
+    # fig_col, ax_col = plt.subplots(1, 2)
+    # ax_col[0].set_xlabel('X [mm]')
+    # ax_col[0].set_ylabel('Y [mm]')
+    # ax_col[1].set_xlabel('X [mm]')
+    # ax_col[0].set_title('Robot')
+    # ax_col[1].set_title('Human')
+    # fig_col.suptitle(f'{remap_type} remapping: Z colormap (proximal)')
+    # range_min = min([min(zdata_robot[:, 0]), min(data2plot[:, 2])])
+    # range_max = max([max(zdata_robot[:, 0]), max(data2plot[:, 2])])
+    # col_plot = ax_col[0].scatter(xdata_robot[:, 0], ydata_robot[:, 0], c=zdata_robot[:, 0],
+    #                              cmap='jet', alpha=1, vmin=range_min, vmax=range_max, s=2)
+    # ax_col[1].scatter(data2plot[:, 0], data2plot[:, 1], c=data2plot[:, 2],
+    #                   cmap='jet', alpha=1, vmin=range_min, vmax=range_max, s=2)
+    # cbar = plt.colorbar(col_plot, ax=ax_col[1])
+    # cbar.set_label('Z [mm]')
+    #
+    # fig_col, ax_col = plt.subplots(1, 2)
+    # ax_col[0].set_xlabel('X [mm]')
+    # ax_col[0].set_ylabel('Y [mm]')
+    # ax_col[1].set_xlabel('X [mm]')
+    # ax_col[0].set_title('Robot')
+    # ax_col[1].set_title('Human')
+    # fig_col.suptitle(f'{remap_type} remapping: Z colormap (distal)')
+    # range_min = min([min(zdata_robot[:, 1]), min(data2plot[:, 5])])
+    # range_max = max([max(zdata_robot[:, 1]), max(data2plot[:, 5])])
+    # col_plot = ax_col[0].scatter(xdata_robot[:, 1], ydata_robot[:, 1], c=zdata_robot[:, 1],
+    #                              cmap='jet', alpha=1, vmin=range_min, vmax=range_max, s=2)
+    # ax_col[1].scatter(data2plot[:, 3], data2plot[:, 4], c=data2plot[:, 5],
+    #                   cmap='jet', alpha=1, vmin=range_min, vmax=range_max, s=2)
+    # cbar = plt.colorbar(col_plot, ax=ax_col[1])
+    # cbar.set_label('Z [mm]')
+
+
 # Linear regression for proximal segment data inclination
 X_lin_reg = xdata_robot[:, 0].reshape((-1, 1))
 y_lin_reg = zdata_robot[:, 0].reshape((-1, 1))
@@ -58,31 +105,30 @@ reg = LinearRegression().fit(X_lin_reg, y_lin_reg)
 m_coeff = reg.coef_[0][0]
 m_angle = np.arctan(m_coeff)
 
-
 ########################################################################################################################
 # TO SELECT IF I WANT TO ROTATE PROXIMAL SEGMENT
-flag_rotate = False
-
-
-def rotate(coord, alpha):
-    x_or = coord[:, 0]
-    y_or = coord[:, 1]
-    z_or = coord[:, 2]
-    x_rot = np.cos(alpha) * x_or + np.sin(alpha) * z_or
-    y_rot = y_or
-    z_rot = (-1) * np.sin(alpha) * x_or + np.cos(alpha) * z_or
-    x_rot = np.reshape(x_rot, (len(x_rot), 1))
-    y_rot = np.reshape(y_rot, (len(y_rot), 1))
-    z_rot = np.reshape(z_rot, (len(z_rot), 1))
-    rot_coord = np.hstack([x_rot, y_rot, z_rot])
-    return rot_coord
-
-
-if flag_rotate:
-    all_data_robot[:, :3] = rotate(all_data_robot[:, :3], m_angle)
-    zdata_robot = all_data_robot[:, [2, 5]]
-    ydata_robot = all_data_robot[:, [1, 4]]
-    xdata_robot = all_data_robot[:, [0, 3]]
+# flag_rotate = False
+#
+#
+# def rotate(coord, alpha):
+#     x_or = coord[:, 0]
+#     y_or = coord[:, 1]
+#     z_or = coord[:, 2]
+#     x_rot = np.cos(alpha) * x_or + np.sin(alpha) * z_or
+#     y_rot = y_or
+#     z_rot = (-1) * np.sin(alpha) * x_or + np.cos(alpha) * z_or
+#     x_rot = np.reshape(x_rot, (len(x_rot), 1))
+#     y_rot = np.reshape(y_rot, (len(y_rot), 1))
+#     z_rot = np.reshape(z_rot, (len(z_rot), 1))
+#     rot_coord = np.hstack([x_rot, y_rot, z_rot])
+#     return rot_coord
+#
+#
+# if flag_rotate:
+#     all_data_robot[:, :3] = rotate(all_data_robot[:, :3], m_angle)
+#     zdata_robot = all_data_robot[:, [2, 5]]
+#     ydata_robot = all_data_robot[:, [1, 4]]
+#     xdata_robot = all_data_robot[:, [0, 3]]
 
 # PLOT ROTATION PROXIMAL SEGMENT
 # fig_rob = plt.figure()
@@ -183,7 +229,6 @@ def min_max_ellipse(a_in, b_in, c_in, center_coord, x_in):
 # Set of points to plot the two ellipsoids (proximal and distal)
 x_ell_pro, y_ell_pro, z_ell_pro = ellipsoid_coord(a[0], b[0], c[0], center[:3], theta, phi)
 x_ell_dist, y_ell_dist, z_ell_dist = ellipsoid_coord(a[1], b[1], c[1], center[3:], theta, phi)
-
 
 ########################################################################################################################
 # PLOTS OF HOW CONFIDENCE INTERVAL AND ELLIPSOID APPEAR IN THE ROBOT WORKSPACE
@@ -316,6 +361,8 @@ min_human = np.amin(all_data_human, axis=0)
 # ax.set_title('Babbling data of the human arm')
 # plt.show()
 
+plot_robot_human(all_data_human, 'No')
+
 
 # PLOT OF ALL BABBLING DATA
 # fig_all = plt.figure()
@@ -368,6 +415,7 @@ def norm_remapping(data_original, demo_t):
 
 remapped_norm = norm_remapping(all_data_human, 'human')
 
+plot_robot_human(remapped_norm, 'Norm')
 
 # fig_n = plt.figure()
 # ax_n = plt.axes(projection='3d')
@@ -440,6 +488,8 @@ def minMax_remapping(data_original):
 
 remapped_minMax = minMax_remapping(all_data_human)
 
+plot_robot_human(remapped_minMax, 'min-Max')
+
 # fig0 = plt.figure()
 # ax0 = plt.axes(projection='3d')
 # ax0.scatter3D(xdata_robot[:, 0], ydata_robot[:, 0], zdata_robot[:, 0], s=0.3, color='b', label='robot')
@@ -473,6 +523,7 @@ def zScore_remapping(data_original, demo_t):
 
 remapped_z = zScore_remapping(all_data_human, 'human')
 
+plot_robot_human(remapped_z, 'Z-score')
 
 # fig_z = plt.figure()
 # ax_z = plt.axes(projection='3d')
@@ -499,6 +550,7 @@ def confInt_remapping(data_original):
 
 remapped_confInt = confInt_remapping(all_data_human)
 
+plot_robot_human(remapped_confInt, 'confInt')
 
 # fig_c = plt.figure()
 # ax_c = plt.axes(projection='3d')
@@ -541,25 +593,27 @@ def ellipsoid_remapping(data_original):
                                        (max_local[4] - min_local[4])) * (y_max - y_min)
         remapped_data[p, 5] = z_min + ((data_original[p, 5] - min_local[5]) /
                                        (max_local[5] - min_local[5])) * (z_max - z_min)
-    if flag_rotate:
-        remapped_data[:, :3] = rotate(remapped_data[:, :3], -m_angle)
+    # if flag_rotate:
+    #     remapped_data[:, :3] = rotate(remapped_data[:, :3], -m_angle)
     return remapped_data
 
 
 remapped_ellipsoid = ellipsoid_remapping(all_data_human)
 
-fig_e = plt.figure()
-ax_e = plt.axes(projection='3d')
-ax_e.scatter3D(xdata_robot[:, 0], ydata_robot[:, 0], zdata_robot[:, 0], s=0.3, color='b', label='robot')
-ax_e.scatter3D(xdata_robot[:, 1], ydata_robot[:, 1], zdata_robot[:, 1], s=0.3, color='b')
-ax_e.scatter3D(remapped_ellipsoid[:, 0], remapped_ellipsoid[:, 1], remapped_ellipsoid[:, 2], s=1, color='r',
-               label='human remapped')
-ax_e.scatter3D(remapped_ellipsoid[:, 3], remapped_ellipsoid[:, 4], remapped_ellipsoid[:, 5], s=1, color='r')
-ax_e.legend()
-ax_e.set_xlabel('x', fontsize=15)
-ax_e.set_ylabel('y', fontsize=15)
-ax_e.set_zlabel('z', fontsize=15)
-ax_e.set_title('Babbling data: ellipsoid remapping')
+plot_robot_human(remapped_ellipsoid, 'Ellipsoid')
+
+# fig_e = plt.figure()
+# ax_e = plt.axes(projection='3d')
+# ax_e.scatter3D(xdata_robot[:, 0], ydata_robot[:, 0], zdata_robot[:, 0], s=0.3, color='b', label='robot')
+# ax_e.scatter3D(xdata_robot[:, 1], ydata_robot[:, 1], zdata_robot[:, 1], s=0.3, color='b')
+# ax_e.scatter3D(remapped_ellipsoid[:, 0], remapped_ellipsoid[:, 1], remapped_ellipsoid[:, 2], s=1, color='r',
+#                label='human remapped')
+# ax_e.scatter3D(remapped_ellipsoid[:, 3], remapped_ellipsoid[:, 4], remapped_ellipsoid[:, 5], s=1, color='r')
+# ax_e.legend()
+# ax_e.set_xlabel('x', fontsize=15)
+# ax_e.set_ylabel('y', fontsize=15)
+# ax_e.set_zlabel('z', fontsize=15)
+# ax_e.set_title('Babbling data: ellipsoid remapping')
 
 ####################################################################################################################
 # WRITE REMAPPED DATA INTO A NEW FILE
@@ -574,7 +628,8 @@ for t in range(len(demo_type_list)):
 
     fig1 = plt.figure()
     ax1 = plt.axes(projection='3d')
-    ax1.scatter3D(all_data_original[:, 0], all_data_original[:, 1], all_data_original[:, 2], s=0.3, c='y', label='babbling robot')
+    ax1.scatter3D(all_data_original[:, 0], all_data_original[:, 1], all_data_original[:, 2], s=0.3, c='y',
+                  label='babbling robot')
     ax1.scatter3D(all_data_original[:, 3], all_data_original[:, 4], all_data_original[:, 5], s=0.3, c='y')
 
     for n in range(len(file_names)):
